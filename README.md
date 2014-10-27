@@ -99,14 +99,15 @@ com.rpc.proxy
     // (Object)
 
 // get request utility
-com.srv.get(path, cb);
+com.rpc.get(path, data, cb);
     // path (String)   route
+    // data (Object)   data    (optional)
     // cb   (Function) callback
 
 // post request utility
-com.srv.post(path, data, cb);
+com.rpc.post(path, data, cb);
     // path (String)   route
-    // data (Object)   data    (optional)
+    // data (Object)   data    
     // cb   (Function) callback
 ```
 
@@ -128,11 +129,8 @@ com.amd.invoke(identifiers, cb)
 ### `com.def` (ncom, bcom)
 
 ```javascript
+// generates class from constructor & supplied prototype contracts
 com.def.define(constr, contracts)
     // constr    (Function)
     // contracts (Array)
-
-com.amd.invoke(identifiers, cb)
-    // identifiers (Array)    Relative paths (can also be string)
-    // cb          (Function) Passed identified module dependencies
 ```

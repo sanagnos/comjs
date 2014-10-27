@@ -667,13 +667,10 @@ function get (route, data, cb) {
         cb   = data;
         data = '';
     } else {
-
-        // enforce json format
         if (typeof data !== 'string')
             data = stringify(data);
-
-        // encode data
         data = encodeURIComponent(data);
+        route += data; 
     }
 
     // init http request

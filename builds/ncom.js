@@ -396,10 +396,22 @@ function request (path, data, method, cb) {
  * Submits GET request.
  * 
  * @param  {String}   path 
+ * @param  {String}   data  JSON data (optional; can be Object)
  * @param  {Function} cb    Passed response
  */
-function get (path, cb) {
-    request(path, null, 'GET', cb);
+function get (path, data, cb) {
+
+    if (arguments.length < 3) {
+        cb   = data;
+        data = '';
+    } else {
+        if (typeof data !== 'string')
+            data = stringify(data);
+        data = encodeURIComponent(data);
+        path += data; 
+    }
+
+    request(path + data, null, 'GET', cb);
 };
 
 /**
