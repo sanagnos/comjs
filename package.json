@@ -1,0 +1,33 @@
+{
+  "name": "comjs",
+  "version": "0.0.1",
+  "author": "Stelios Anagnostopoulos <stelios@outlook.com>",
+  "description": "RPC-based AMD server-client middleware",
+  "license": "All rights reserved.",
+  "main": "index.js",
+  "engines": {
+    "node": "0.10.32"
+  },
+  "dependencies": {
+    "ws": "*"
+  },
+  "devDependencies": {
+    "grunt": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-uglify": "*"
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "mocha test/**/*.js"
+  },
+  "homepage": "https://github.com/sanagnos/comjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanagnos/comjs"
+  },
+  "bugs": {
+    "url": "https://github.com/sanagnos/comjs/issues"
+  }
+}
