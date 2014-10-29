@@ -1,1 +1,1 @@
-module.exports = require('builds/ncom.js');
+module.exports = require('./builds/ncom.js');
