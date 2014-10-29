@@ -130,7 +130,7 @@ com.amd.invoke(identifiers, cb)
 
 ```javascript
 // generates class from constructor & supplied prototype contracts
-com.def.define(constr, contracts)
+com.def(constr, contracts)
     // constr    (Function)
     // contracts (Array)
 ```

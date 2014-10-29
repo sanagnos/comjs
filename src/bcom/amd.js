@@ -5,7 +5,7 @@
 // Browser AMD client.
 // 
 // @author
-//      10/26/14    Stelios Anagnostopoulos     stelios@outlook.com
+//      10/28/14    Stelios Anagnostopoulos     stelios@outlook.com
 //      
 // Copyright 2014, @author. All rights reserved.
 // ============================================================================
@@ -68,12 +68,12 @@ function invoke (identifiers, cb) {
         [ paths.text, loadHTML ]
     ], function () {
         
-        each( paths.js, function (path) {
+        each( paths.js, function (path, done) {
 
             // if not registered, load from server & recur
             if ( !registry[path] ) {
                 loadJS( path, function() {
-                    invoke( path, cb );
+                    invoke( path, done );
                 });
 
             // if registered and unloaded
@@ -89,7 +89,7 @@ function invoke (identifiers, cb) {
                             if (!registry[path].module)
                                 registry[path].module = ctx;
                             registry[path].status = 1;
-                            cb( registry[path].module );
+                            done( registry[path].module );
                         });
                     } else {
                         var ctx = {};
@@ -97,21 +97,22 @@ function invoke (identifiers, cb) {
                         if (!registry[path].module)
                             registry[path].module = ctx;
                         registry[path].status = 1;
-                        cb( registry[path].module );
+                        done( registry[path].module );
                     }
 
                 // if a non-function declaration, propagate
                 } else {
                     registry[path].status = 1;
-                    cb( registry[path].module );
+                    done( registry[path].module );
                 }
 
             // if already loaded
             } else if ( registry[path].status === 1 ) {
-                cb( registry[path].module );
+                done( registry[path].module );
             }
 
         }, function (modules) { 
+            console.log( modules );
             cb.apply(null, modules);
         });
     });
@@ -124,13 +125,13 @@ function invoke (identifiers, cb) {
 function transformPaths (paths, cb) {
 
     var paths = paths instanceof Array ? paths : [paths],
-        idx   = paths.length,
+        idx   = 0,
         js    = [],
         css   = [],
         html  = [],
         text  = [],
         postfix;
-    while (idx--) {
+    while (idx < paths.length) {
 
         postfix = paths[idx].match(/.*\.(.*)/);
         if ( postfix && postfix[ postfix.length - 1 ][0] !== '/' ) {
@@ -160,6 +161,8 @@ function transformPaths (paths, cb) {
                 text[text.length] = paths[idx];
                 break;
         }
+
+        idx++;
     }
 
     return { js: js, html: html, css: css, text: text };

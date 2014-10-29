@@ -3,7 +3,7 @@
 // ============================================================================
 // Name      : comjs
 // Version   : 0.0.1
-// Build date: 26-10-2014
+// Build date: 28-10-2014
 // 
 // Copyright (c) 2014, Stelios Anagnostopoulos <stelios@outlook.com>
 // All rights reserved.
