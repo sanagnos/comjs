@@ -22,9 +22,9 @@ This is a recent merge of the [define](https://github.com/sanagnos/define) & [we
 Run `npm install comjs` to setup.
 
 Best way is to go thru the example.
-Run `node ./examples/native/server` and `chrome localhost` (F12 to see console output).
-
-Also check out the native client with a parallel node process `node ./examples/native/client.js`.
+- Point your terminal to `cb ./comjs/example/native`
+- Run `node server` and `chrome localhost` (F12 to see console output).
+- Also check out the native client with a parallel node process `node client.js`.
 
 ## API
 
