@@ -31,7 +31,9 @@ var slice            = Array.prototype.slice,
 // - close
 // - proxy
 // - get
+// - put
 // - post
+// - delete
 // ============================================================================
 
 // ============================================================================
@@ -424,10 +426,10 @@ function invoke (identifiers, cb) {
 function append (identifiers, cb) {
     var paths = transformPaths(identifiers);
     eachGroup([
-        [ paths.css,  function (e, next) { if (typeof e === 'object') appendCSS(e[0], e[1], next); else appendCSS (e) } ],
-        [ paths.html, function (e, next) { if (typeof e === 'object') appendHTML(e[0], e[1], next); else appendHTML(e) } ],
-        [ paths.js,   function (e, next) { if (typeof e === 'object') appendJS(e[0], e[1], next); else appendJS(e) } ],
-        [ paths.text, function (e, next) { if (typeof e === 'object') appendHTML(e[0], e[1], next); else appendHTML(e) } ]
+        [ paths.css,  function (e, next) { if (typeof e === 'object') appendCSS(e[0], e[1], next);  else appendCSS (e, next) } ],
+        [ paths.html, function (e, next) { if (typeof e === 'object') appendHTML(e[0], e[1], next); else appendHTML(e, next) } ],
+        [ paths.js,   function (e, next) { if (typeof e === 'object') appendJS(e[0], e[1], next);   else appendJS(e, next)   } ],
+        [ paths.text, function (e, next) { if (typeof e === 'object') appendHTML(e[0], e[1], next); else appendHTML(e, next) } ]
     ], function () {
         cb();
     });
@@ -496,6 +498,8 @@ function appendCSS(path, parent, cb) {
         cb     = parent;
         parent = document.body;
     }
+    if (!parent)
+        parent = document.body;
     if (!path.match(/.css$/)) 
         path += '.css';
 
@@ -523,6 +527,8 @@ function appendHTML(path, parent, cb) {
         cb     = parent;
         parent = document.body;
     }
+    if (!parent)
+        parent = document.body;
     if (!path.match(/.html$/)) 
         path += '.html';
 
@@ -551,6 +557,8 @@ function appendJS(path, parent, cb) {
         cb     = parent;
         parent = document.body;
     }
+    if (!parent)
+        parent = document.body;
     if (!path.match(/.js$/)) 
         path += '.js';
 
