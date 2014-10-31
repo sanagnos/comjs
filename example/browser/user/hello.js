@@ -1,4 +1,4 @@
-com.amd.declare('/user/hello', function () {
+com.declare('/user/hello', function () {
     var msg = 'hi';
 
     return {

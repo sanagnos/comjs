@@ -1,26 +1,22 @@
 {
   "name": "comjs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Stelios Anagnostopoulos <stelios@outlook.com>",
-  "description": "RPC-based AMD server-client middleware",
+  "description": "An implementation of the Component Object Module architecture for native & browser environment, inspired by COM of the desktop era.",
   "license": "All rights reserved.",
-  "main": "index.js",
+  "main": "ncom.js",
   "engines": {
-    "node": "0.10.32"
+    "node": "0.10.33"
   },
   "dependencies": {
     "ws": "*"
   },
   "devDependencies": {
     "grunt": "*",
-    "grunt-contrib-concat": "*",
     "grunt-contrib-uglify": "*"
   },
   "directories": {
     "example": "examples"
-  },
-  "scripts": {
-    "test": "mocha test/**/*.js"
   },
   "homepage": "https://github.com/sanagnos/comjs",
   "repository": {

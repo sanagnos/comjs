@@ -3,134 +3,206 @@ comjs
 
 > An implementation of the Component Object Module architecture for native & browser environment, inspired by [COM](http://en.wikipedia.org/wiki/Component_Object_Model) of the desktop-era.
 
+The goal is to consolidate fragmented workflows to a consistent API engineered around laconic & frinctionless development: use the minimum necessary steps & aim for the maximum performance.
+
+The scope of the functionality falls under five recurring tasks:
+
+- file serving
+- request routing
+- async module loading
+- client-server rpc
+- class/interface inheritance
+
+The approach is inline with Javascript's laconism & orthogonal take on type-checking.
+
 ## Getting started
 
-Run `npm instamm comjs` to install.
+Run `npm install comjs` to setup.
 
 Best way is to go thru the example.
-Run `node ./examples/native/server` and `chrome localhost`.
+Run `node ./examples/native/server` and `chrome localhost` (F12 to see console output).
 
 Also check out the native client with a parallel node process `node ./examples/native/client.js`.
 
-This is a recent merge of the [define](https://github.com/sanagnos/define) & [web-kernel](https://github.com/sanagnos/web-kernel) repos.
+This is a recent merge of the [define](https://github.com/sanagnos/define) & [web-kernel](https://github.com/sanagnos/web-kernel) repos, and an open-source component of an [experiment](http://www.nesi.io) with an impossible enough goal to have become an obsession.
 
 ## API
 
 ncom is the native implementation of the middleware & bcom is for the browser.
 
-### `com.srv` (ncom)
+### server (ncom only)
 
 ```javascript
-com.srv.open(config, cb)
-    // config (Object)
-    //   port
-    //   requests
-    //   files
-    //   services
-    //
-    // cb (Function)
+/**
+ * Initializes server.
+ * 
+ * @param  {Object}   config Map of { port, requests, services, files }
+ * @param  {Function} cb
+ */
+com.init(config, cb);
 
-com.srv.close()
+/**
+ * Stops server.
+ * 
+ * @param  {Function} cb
+ */
+com.exit(cb);
 
-com.srv.registerRequests(registrations);
-    // registrations (Array)
-    //   [ 
-    //      { path0: function (req, res) {} },
-    //
-    //      'request-exports.js'
-    //   ]
-    //
-    //  (note: can be single entry, object or string)
+/**
+ * Registers files.
+ * 
+ * @param  {Array} registrations Collection of [ { route0: function (req, res) {} } ]
+ */
+com.registerRequests(registrations);
 
-com.srv.unregisterRequests(routes);
-    // routes
-    //   list of request routes; can also be single string
+/**
+ * Unregister requests.
+ * 
+ * @param  {Array} identifiers (can be String)
+ */
+com.unregisterRequests(identifiers);
 
-com.srv.registerFiles(registrations);
-    // registrations (Array)
-    //   [ 
-    //      { 
-    //        route0: [ './file.js', './dir/subdir' ], 
-    //        route1: './otherFile.js',
-    //      },
-    //
-    //      'file-exports.js'
-    //   ]
-    //
-    //  (note: can be single entry, object or string)
+/**
+ * Registers files.
+ * 
+ * @param  {Array} registrations Collection of [ { route0: [filePath0] } ]
+ */
+com.registerFiles(registrations);
 
-com.srv.unregisterFiles(routes);
-    // routes
-    //   list of serving routes; can also be single string
+/**
+ * Unregister files.
+ * 
+ * @param  {Array} identifiers (can be String)
+ */
+com.unregisterFiles(identifiers);
 
-com.srv.registerServices(registrations);
-    // registrations (Array)
-    //   [ 
-    //      { name0: { perms: [], method0: function () {} }},
-    //
-    //      'service-exports.js'
-    //   ]
-    //
-    //  (note: can be single entry, object or string)
+/**
+ * Registers files.
+ * 
+ * @param  {Array} registrations Collection of [ { name0: { perms: ['foo-group'], taskBar: function () { res.done() }} } ]
+ */
+com.registerServices(registrations);
 
-com.srv.unregisterServices(names);
-    // names (Array)
-    //   list of service names; can also be single string
+/**
+ * Unregister services.
+ * 
+ * @param  {Array} identifiers (can be String)
+ */
+com.unregisterServices(names);
 ```
 
-### `com.rpc` (ncom, bcom)
+### rpc (ncom & bcom)
 
 ```javascript
+/**
+ * Connects to websocket channel.
+ *
+ * @param  {Object}   config Connection endpoint as url string or config map of {path, auth, wss}
+ * @param  {Function} cb     Callback
+ */
+com.open(config, cb);
 
-// opens rpc websocket channel
-com.rpc.open(config, cb)
-    // config (Object)
-    //   path (String)  Connection endpoint
-    //   wss  (Boolean) Use secure connection (default = false)
-    //   auth (Array)   Auth creds for non-public services (default = [])
-    //
-    //   (note: config can also be the connection endpoint string)
+/**
+ * Closes websocket channel.
+ */
+com.close();
 
-// closes rpc channel
-com.rpc.close()
+/**
+ * Map of public and/or authorized proxies to native modules.
+ *
+ * @type {Object}
+ */
+com.proxy;
 
-// map of callable service-side services
-com.rpc.proxy
-    // (Object)
+/**
+ * Submits GET request.
+ * 
+ * @param  {String}   url      Request route, conditionally with parameters 
+ * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Function} cb       Passed response text, in JSON format if applicable
+ */
+com.submtGet(path, data, cb);
 
-// get request utility
-com.rpc.get(path, data, cb);
-    // path (String)   route
-    // data (Object)   data    (optional)
-    // cb   (Function) callback
+/**
+ * Submits PUT request.
+ * 
+ * @param  {String}   url      Request route, conditionally with parameters 
+ * @param  {Object}   body     Request body (optional)
+ * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Function} cb       Passed response text, in JSON format if applicable
+ */
+com.submitPut(url, headers, cb);
 
-// post request utility
-com.rpc.post(path, data, cb);
-    // path (String)   route
-    // data (Object)   data    
-    // cb   (Function) callback
+/**
+ * Submits POST request.
+ * 
+ * @param  {String}   url      Request route, conditionally with parameters 
+ * @param  {Object}   body     Request body (optional)
+ * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Function} cb       Passed response text, in JSON format if applicable
+ */
+com.submitPost(url, body, headers, cb);
+
+/**
+ * Submits DELETE request.
+ * 
+ * @param  {String}   url      Request route
+ * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Function} cb       Passed response text, in JSON format if applicable
+ */
+com.submitDelete(url, headers, cb);
 ```
 
-### `com.amd` (bcom)
+### amd (bcom only)
 
 ```javascript
-// declares module
-com.amd.declare(identifier, dependencies, module)
-    // identifier   (String)   Relative path      
-    // dependencies (Array)    List of required files
-    // module       (Function) Passed module dependecies
+/**
+ * Declares a module.
+ * 
+ * @param  {String}   identifier   Static path to module      
+ * @param  {Array}    dependencies List of required dependecies/files
+ * @param  {Function} module       Callback with module dependecies as args
+ */
+com.declare(identifier, dependencies, module);
 
-// invokes module (can be js, html, css, txt, etc.)
-com.amd.invoke(identifiers, cb)
-    // identifiers (Array)    Relative paths (can also be string)
-    // cb          (Function) Passed identified module dependencies
+/**
+ * Invokes a module.
+ * 
+ * @param  {Array}    identifiers Static path(s) to modules/files
+ * @param  {Function} cb          Callback with invoked modules as args    
+ */
+com.invoke(identifiers, cb);
 ```
 
-### `com.def` (ncom, bcom)
+/**
+ * Appends js, css, html, txt to dom.
+ * 
+ * @param  {Array}    identifiers Static path(s) to assets; ([path, parentElement] entries are allowed)
+ * @return {Function} cb          Callback
+ */
+com.append(identifiers, cb);
+```
+### define (ncom, bcom)
 
 ```javascript
-// generates class from constructor & supplied prototype contracts
-com.def(constr, contracts)
-    // constr    (Function)
-    // contracts (Array)
+/**
+ * Generates class definition given a collection of prototype
+ * contracts.
+ * 
+ * @param  {Function} constr    
+ * @param  {Array}    contracts (can also be single object)
+ * @return {Function}          
+ */
+com.define(constr, contracts);
 ```
+
+## Bugs
+Possibly lurking. I'm actively working with this, so any fixes should make it here quickly.
+
+## License
+Feel free to use non-commercially, but drop me a line for anything but for the sake of ~~yin-yang~~ win-win.
+
+## Changelog
+* 0.0.1 -- Base functionality
+* 0.0.2 -- Dependency injection order bugs
+* 0.0.3 -- Refactored to single module scope for faster initialization & access

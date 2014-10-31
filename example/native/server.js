@@ -1,6 +1,6 @@
-var com = require('../../builds/ncom');
+var com = require('../../ncom');
 
-com.srv.open({
+com.init({
     
     port: 80,
 
@@ -37,17 +37,18 @@ com.srv.open({
 
     files: [
         {
-            '/'   : ['../../builds/bcom.js', '../browser'],
-            '/lib': [ './math.js' ]
+            '/'   : [ '../browser' ],
+            '/lib': [ './math.js', './this.txt'  ]
         },
 
         './file-routes.js'
     ]
+
 }, function () {
 
-    com.rpc.open('http://localhost', function () {
+    com.open('http://localhost', function () {
 
-        com.rpc.proxy.calc.add(1, 2, function (res) {
+        com.proxy.calc.add(1, 2, function (res) {
             console.log(res);
         });
     });

@@ -1,4 +1,4 @@
-com.amd.declare('/math.js', function () {
+com.declare('/math.js', function () {
     var pi = 3.14;
 
     return {

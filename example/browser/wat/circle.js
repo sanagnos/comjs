@@ -1,4 +1,4 @@
-com.amd.declare('/wat/circle', function () {
+com.declare('/wat/circle', function () {
     var pi = 3.14;
 
     return {
