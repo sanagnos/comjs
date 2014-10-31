@@ -2,7 +2,7 @@
   "name": "comjs",
   "version": "0.0.3",
   "author": "Stelios Anagnostopoulos <stelios@outlook.com>",
-  "description": "An implementation of the Component Object Module architecture for native & browser environment, inspired by COM of the desktop era.",
+  "description": "A vweb take of the Component Object Module architecture, spanning both native & browser environments.",
   "license": "All rights reserved.",
   "main": "ncom.js",
   "engines": {

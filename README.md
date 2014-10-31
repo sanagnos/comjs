@@ -1,7 +1,7 @@
 comjs
 =====
 
-> An implementation of the Component Object Module architecture for native & browser environment, inspired by [COM](http://en.wikipedia.org/wiki/Component_Object_Model) of the desktop-era.
+> A vweb take of the Component Object Module architecture, spanning both native & browser environments, and inspired by [COM](http://en.wikipedia.org/wiki/Component_Object_Model) of the desktop-era.
 
 The goal is to consolidate fragmented workflows to a consistent API engineered around laconic & frinctionless development: use the minimum necessary steps & aim for the maximum performance.
 
@@ -172,7 +172,6 @@ com.declare(identifier, dependencies, module);
  * @param  {Function} cb          Callback with invoked modules as args    
  */
 com.invoke(identifiers, cb);
-```
 
 /**
  * Appends js, css, html, txt to dom.
