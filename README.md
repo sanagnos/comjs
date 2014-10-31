@@ -121,7 +121,7 @@ com.proxy;
  * @param  {Object}   headers  Map of request headers (optional)
  * @param  {Function} cb       Passed response text, in JSON format if applicable
  */
-com.submtGet(path, data, cb);
+com.submitGet(path, data, cb);
 
 /**
  * Submits PUT request.
