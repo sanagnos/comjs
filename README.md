@@ -15,6 +15,8 @@ The scope of the functionality falls under five recurring tasks:
 
 The approach is inline with Javascript's laconism & orthogonal take on type-checking.
 
+This is a recent merge of the [define](https://github.com/sanagnos/define) & [web-kernel](https://github.com/sanagnos/web-kernel) repos, and an open-source component of an [experiment](http://www.nesi.io) with an impossible enough goal to have become an obsession.
+
 ## Getting started
 
 Run `npm install comjs` to setup.
@@ -23,8 +25,6 @@ Best way is to go thru the example.
 Run `node ./examples/native/server` and `chrome localhost` (F12 to see console output).
 
 Also check out the native client with a parallel node process `node ./examples/native/client.js`.
-
-This is a recent merge of the [define](https://github.com/sanagnos/define) & [web-kernel](https://github.com/sanagnos/web-kernel) repos, and an open-source component of an [experiment](http://www.nesi.io) with an impossible enough goal to have become an obsession.
 
 ## API
 
