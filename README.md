@@ -1,7 +1,7 @@
 comjs
 =====
 
-> A vweb take of the Component Object Module architecture, spanning both native & browser environments, and inspired by [COM](http://en.wikipedia.org/wiki/Component_Object_Model) of the desktop-era.
+> A vweb take of the Component Object Module architecture, spanning both native & browser environments, and inspired by the original [COM](http://en.wikipedia.org/wiki/Component_Object_Model).
 
 The goal is to consolidate fragmented workflows to a consistent API engineered around laconic & frinctionless development: use the minimum necessary steps & aim for the maximum performance.
 
