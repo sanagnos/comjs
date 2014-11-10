@@ -150,12 +150,16 @@ function registerFiles (registrations) {
                                 break;
                         }
 
-                        if (files[j] === file)
-                            path = join( route, basename(file) ).replace(/\\/g, '/');
-                        else
-                            path = join(route, file).replace(/\\/g, '/');
-                        file = resolve(file);
+                        if ( file === files[j] )
+                            path = resolve(route, basename(file)).replace(/\\/g, '/');
+                        else {
+                            path = resolve(route, file).replace(/\\/g, '/');
+                            path = path.replace(route, '');
+                        }
+                        path = path.slice(path.indexOf('/'));
 
+                        file = resolve(file);
+                        console.log(path, file);
                         requests[path] = (function (ctype) {
                             return function (req, res) {
                                 res.writeHead(200, {'Content-Type': ctype });

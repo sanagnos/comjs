@@ -205,3 +205,5 @@ Feel free to use non-commercially, but drop me a line for anything but for the s
 * 0.0.1 -- Base functionality
 * 0.0.2 -- Dependency injection order bugs
 * 0.0.3 -- Refactored to single module scope for faster initialization & access
+* 0.0.4 -- Fixed append* scenario with with no parent parameter
+* 0.0.5 -- Fixed path inconsistency bug on request registeration
