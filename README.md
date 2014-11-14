@@ -3,7 +3,7 @@ comjs
 
 > A vweb take of the Component Object Model architecture, spanning both native & browser environments, and inspired by the original [COM](http://en.wikipedia.org/wiki/Component_Object_Model).
 
-Most infrastructure running on Windows today is based on COM, a C++ interface standard that allows for componetization, reuse, and host-agnostic rpc. The web differs from these fronts only in that instead of componentization (& the implied rigid hierarchies of OOP), the focus is on functional modularization (& the implied flexibility of a functional perspective without the domain-constraints imposed by strict OOP). Simply put, the most imporant difference is that instead of requiring dll presense on the disk, the moderl requires a valid url endpoint to a module loaded asynchronously & is JIT-compiled on the client.
+Most infrastructure running on Windows today is based on COM, a C++ interface standard that allows for componetization, reuse, and host-agnostic rpc. The web differs from these fronts only in that instead of componentization (& the implied rigid hierarchies of OOP), the focus is on functional modularization (& the implied flexibility of a functional perspective without the domain-constraints imposed by strict OOP). Simply put, the most imporant difference is that instead of requiring dll presence on the disk, the model requires a valid url endpoint to a module that's loaded asynchronously & is JIT-compiled on the client.
 
 The goal is to consolidate fragmented workflows in client/server systems for the web in a single language and a consistent API surface engineered around laconic & frinctionless development: use the minimum necessary steps & aim for the maximum performance.
 
