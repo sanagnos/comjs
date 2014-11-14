@@ -52,14 +52,14 @@ ncom is the native implementation of the middleware & bcom is for the browser.
  * @param  {Object}   config Map of { port, requests, services, files }
  * @param  {Function} cb
  */
-com.init(config, cb);
+com.start(config, cb);
 
 /**
  * Stops server.
  * 
  * @param  {Function} cb
  */
-com.exit(cb);
+com.stop(cb);
 
 /**
  * Registers files.
