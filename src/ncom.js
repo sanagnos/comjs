@@ -2,7 +2,7 @@
 // ncom.js
 // ============================================================================
 // 
-// Native implementation of RPC-based AMD server-client middleware.
+// Native (node.js) implementation of comjs.
 // 
 // Copyright (c) 2014, Stelios Anagnostopoulos <stelios@outlook.com>
 // All rights reserved.
@@ -43,10 +43,10 @@ var createHttpServer = http.createServer,
     defineProperties = Object.defineProperties;
 
 // ============================================================================
-// Native Http & WebSocket server
+// Http & WebSocket server
 // ============================================================================
-// - init
-// - exit
+// - start
+// - stop
 // - registerRequests
 // - registerFiles
 // - registerServices
@@ -76,7 +76,7 @@ function registerRequests (registrations) {
     if ( !(registrations instanceof Array) ) 
         registrations = [registrations];
 
-    for (var i = 0, len = registrations.length, entry, mod, key; i < len; i++) {
+    for (var i = 0, len = registrations.length, entry, key; i < len; i++) {
         
         entry = registrations[i];
         
@@ -156,9 +156,10 @@ function registerFiles (registrations) {
                             path = resolve(route, file).replace(/\\/g, '/');
                             path = path.replace(route, '');
                         }
-                        path = path.slice(path.indexOf('/'));
 
+                        path = path.slice(path.indexOf('/'));
                         file = resolve(file);
+
                         console.log(path, file);
                         requests[path] = (function (ctype) {
                             return function (req, res) {
@@ -308,7 +309,7 @@ function walkSync (dir, iter) {
  * @param  {Object}   config Map of { port, requests, services, files }
  * @param  {Function} cb
  */
-function init (config, cb) {
+function start (config, cb) {
 
     if (config.requests)
         registerRequests(config.requests);
@@ -411,7 +412,7 @@ function init (config, cb) {
  * 
  * @param  {Function} cb
  */
-function exit (cb) {
+function stop (cb) {
     webSocketServer.close();
     httpServer.close(function () {
         if (cb) cb();
@@ -419,15 +420,11 @@ function exit (cb) {
 };
 
 // ============================================================================
-// RPC client
+// Websocket client
 // ============================================================================
 // - open
 // - close
 // - proxy
-// - get
-// - put
-// - post
-// - delete
 // ============================================================================
 
 // ============================================================================
@@ -440,7 +437,7 @@ var websocket,         // websocket channel
     connected = false; // connection flag
 
 // ============================================================================
-// Channel services
+// Channel connection
 // ============================================================================
 
 /**
@@ -531,6 +528,10 @@ function close () {
         websocket.close();
 };
 
+// ============================================================================
+// Service RPC
+// ============================================================================
+
 /**
  * Sends RPC task call to channel.
  * 
@@ -587,7 +588,14 @@ function proxify (stencil) {
 };
 
 // ============================================================================
-// Requests
+// Http client requests
+// ============================================================================
+// - request
+// - get
+// - put
+// - update
+// - post
+// - delete
 // ============================================================================
 
 /**
@@ -598,25 +606,15 @@ function proxify (stencil) {
  * @param  {String}   method  Request method  
  * @param  {Object}   headers Map of request headers (optional)
  * @param  {Function} cb      Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function request (url, body, method, headers, cb) {
-
-    if (typeof body === 'string') {
-        cb      = headers;
-        headers = method;
-        method  = body;
-    }
-
-    if (typeof headers === 'function') {
-        cb      = headers;
-        headers = null;
-    }
-
+function request (url, body, method, headers, cb, cberr) {
     var urlData = parseUrl(url),
         request = urlData.protocol === 'https:' ? submitHttps : submitHttp;
+
     var req = request({
         hostname: urlData.hostname,
-        url     : urlData.url,
+        path    : urlData.path,
         method  : method,
         headers : headers
     }, function (res) {
@@ -634,8 +632,12 @@ function request (url, body, method, headers, cb) {
         req.write(typeof body === 'string' ? body : parseJSON(body) );
 
     req.on('error', function (err) {
-        throw new Error(err);
+        if (cberr)
+            cberr(new Error(err));
+        else
+            throw new Error(err);
     });
+
     req.end();
 };
 
@@ -645,52 +647,92 @@ function request (url, body, method, headers, cb) {
  * @param  {String}   url      Request route, conditionally with parameters 
  * @param  {Object}   headers  Map of request headers (optional)
  * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function submitGet (url, headers, cb) {
-    request(url, 'GET', headers, cb);
+function submitGet (url, headers, cb, cberr) {
+    if (typeof arguments[1] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, null, 'GET', headers, cb, cberr);
 };
 
 /**
  * Submits PUT request.
  * 
  * @param  {String}   url      Request route, conditionally with parameters 
- * @param  {Object}   body     Request body (optional)
- * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Object}   body     Request body 
+ * @param  {Object}   headers  Map of request headers
  * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function submitPut (url, body, headers, cb) {
-    request(url, body, 'PUT', headers, cb);
+function submitPut (url, body, headers, cb, cberr) {
+    if (typeof arguments[2] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, body, 'PUT', headers, cb, cberr);
+};
+
+/**
+ * Submits PATCH request.
+ * 
+ * @param  {String}   url      Request route
+ * @param  {Object}   headers  Map of request headers
+ * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
+ */
+function submitPatch (url, headers, cb, cberr) {
+    if (typeof arguments[1] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, null, 'PATCH', headers, cb);
 };
 
 /**
  * Submits POST request.
  * 
  * @param  {String}   url      Request route, conditionally with parameters 
- * @param  {Object}   body     Request body (optional)
- * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Object}   body     Request body
+ * @param  {Object}   headers  Map of request headers
  * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function submitPost (url, body, headers, cb) {
-    request(url, body, 'POST', headers, cb);
+function submitPost (url, body, headers, cb, cberr) {
+    if (typeof arguments[2] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, body, 'POST', headers, cb, cberr);
 };
 
 /**
  * Submits DELETE request.
  * 
  * @param  {String}   url      Request route
- * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Object}   headers  Map of request headers
  * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function submitDelete (url, headers, cb) {
-    request(url, 'GET', headers, cb);
+function submitDelete (url, headers, cb, cberr) {
+    if (typeof arguments[1] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, null, 'DELETE', headers, cb);
 };
 
-
-// ========================================================================
-// Class definition
-// ========================================================================
+// ============================================================================
+// Prototypal class definition
+// ============================================================================
 // - define
-// ========================================================================
+// ============================================================================
 
 /**
  * Generates class definition given a collection of prototype
@@ -798,13 +840,69 @@ function bind (proto, attr) {
     }
 };
 
-// ========================================================================
+// ============================================================================
+// Async iteration
+// ============================================================================
+// - each
+// - eachGroup
+// ============================================================================
+
+/**
+ * Applies async task to items & propagates to cb when done.
+ * 
+ * @param  {Function} task  
+ * @param  {Array}    items (Can be non-array/single item)
+ * @param  {Function} cb    Passed array of res for each item applied to task
+ */
+function each (items, task, cb) { // adapted from https://github.com/caolan/async
+
+    if ( !(items instanceof Array) )
+        items = [items];
+
+    var idx = 0,
+        len = items.length,
+        res = [];
+
+    if (!len)
+        return cb([]);
+
+    var iter = function () {
+        task(items[idx++], function (out) {
+            res[res.length] = out;
+            if (idx >= len)
+                cb(res);
+            else
+                iter();
+        });
+    };
+    
+    iter();
+};
+
+/**
+ * Applies async task to items for each group & propagates to cb when done.
+ * (See each)
+ * 
+ * @param  {Array}    groups List of [ [items, task], ... ]
+ * @param  {Function} cb     Passed array of results for each group
+ */
+function eachGroup (groups, cb) {
+
+    if ( !(groups instanceof Array) )
+        groups = [].concat(groups);
+    
+    each(groups, function (group, done) {
+        each(group[0], group[1], done);
+    }, cb);
+};
+
+// ============================================================================
 // Exports
-// ========================================================================
+// ============================================================================
 
 module.exports = {
-    init            : init,
-    exit            : exit,
+    start           : start,
+    stop            : stop,
     registerRequests: registerRequests,
     registerFiles   : registerFiles,
     registerServices: registerServices,
@@ -814,10 +912,15 @@ module.exports = {
     open : open,
     close: close,
 
+    request     : request,
     submitGet   : submitGet,
     submitPut   : submitPut,
+    submitPatch : submitPatch,
     submitPost  : submitPost,
     submitDelete: submitDelete,
 
-    define: define
+    define: define,
+
+    each: each,
+    eachGroup: eachGroup
 };

@@ -1,6 +1,6 @@
 var com = require('../../ncom');
 
-com.init({
+com.start({
     
     port: 80,
 
@@ -22,7 +22,7 @@ com.init({
         {
             '/' : function (req, res) {
                 res.writeHead(301, {
-                    'location': '/browser/index.html'
+                    'location': '/index.html'
                 });
                 res.end();
             },

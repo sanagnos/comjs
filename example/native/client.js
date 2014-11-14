@@ -10,10 +10,6 @@ com.open('http://localhost', function () {
     });
 });
 
-com.submitGet('http://localhost/test/this.txt', function (data) {
-    console.log(data);
-});
-
 com.submitGet('http://localhost/foo', function (data) {
     console.log(data);
 });

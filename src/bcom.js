@@ -2,7 +2,7 @@
 // bcom.js
 // ============================================================================
 // 
-// Browser implementation of RPC-based AMD server-client middleware.
+// Browser implementation of comjs.
 // 
 // Copyright (c) 2014, Stelios Anagnostopoulos <stelios@outlook.com>
 // All rights reserved.
@@ -13,34 +13,18 @@
 window.com = window.bcom = (function () {
 
 // ============================================================================
-// Cache
-// ============================================================================
-
-var slice            = Array.prototype.slice,
-    serialize        = JSON.stringify,
-    parseJSON        = JSON.parse,
-    defineProperty   = Object.defineProperty,
-    defineProperties = Object.defineProperties,
-    keysOf           = Object.keys,
-    floor            = Math.floor;
-
-// ============================================================================
-// RPC client
+// Websocket client
 // ============================================================================
 // - open
 // - close
 // - proxy
-// - get
-// - put
-// - post
-// - delete
 // ============================================================================
 
 // ============================================================================
 // Cache
 // ============================================================================
 
-var url,
+var url,               // connection endpoint
     websocket,         // websocket channel
     proxy,             // service proxy
     callback,          // callback registry as { timestampN: fn }
@@ -109,7 +93,7 @@ function open (config, cb) {
             return;
 
         // parse data
-        var data = parseJSON(e.data),
+        var data = JSON.parse(e.data),
             resp = data[0],
             time = data[1],
             done = data[2];
@@ -138,6 +122,10 @@ function close () {
         websocket.close();
 };
 
+// ============================================================================
+// Service RPC
+// ============================================================================
+
 /**
  * Sends RPC task call to channel.
  * 
@@ -153,7 +141,7 @@ function send (name, task, args, cb) {
 
     // package data
     var time = performance.now(),
-        data = serialize([name, task, args, time]);
+        data = JSON.stringify([name, task, args, time]);
 
     // cache callback
     callback[time] = cb;
@@ -182,7 +170,7 @@ function proxify (stencil) {
             proxy[name][task] = (function (name, task) {
                 return function () {
 
-                    var args = slice.call(arguments),
+                    var args = Array.prototype.slice.call(arguments),
                         cb   = typeof args[args.length - 1] === 'function' ? args.pop() : null;
 
                     send(name, task, args, cb);
@@ -192,54 +180,59 @@ function proxify (stencil) {
 };
 
 // ============================================================================
-// Requests
+// Http client requests
+// ============================================================================
+// - request
+// - get
+// - put
+// - update
+// - post
+// - delete
 // ============================================================================
 
 /**
  * Submits request.
  * 
  * @param  {String}   url     Request route, conditionally with parameters 
- * @param  {Object}   body    Request body (optional)
+ * @param  {Object}   body    Request body
  * @param  {String}   method  Request method  
- * @param  {Object}   headers Map of request headers (optional)
+ * @param  {Object}   headers Map of request headers
  * @param  {Function} cb      Passed response text, in JSON format if applicable
+ * @param  {Function} cberr   Error callback (optional)
  */
-function request (url, body, method, headers, cb) {
-
-    if (typeof body === 'string') {
-        cb      = headers;
-        headers = method;
-        method  = body;
-    }
-
-    if (typeof headers === 'function') {
-        cb      = headers;
-        headers = null;
-    }
+function request (url, body, method, headers, cb, cberr) {
 
     var http = new XMLHttpRequest();
 
     http.open(method, url, true);
 
     http.onload = function () {
-        if (http.readyState === 4 && ( http.status === 200 || http.status === 201 )) {
-            var res = http.responseText;
-            if (res) {
-                if (typeof res === 'object')
-                    return cb(res);
+        if (http.readyState === 4) {
+            if ( http.status === 200 || http.status === 201 ) {
+                var res = http.responseText;
+                if (res) {
+                    if (typeof res === 'object')
+                        return cb(res);
 
-                try {
-                    res = parseJSON(http.responseText);
-                } catch (e) {}
+                    try {
+                        res = JSON.parse(http.responseText);
+                    } catch (e) {}
+                }
+                cb(res);
+            } else if ( Math.floor(http.status / 400) === 4 || Math.floor(http.status / 300) === 3 ) {
+                if (cberr)
+                    cberr(new Error('request failed with status: '+ http.status + ', reason: ' + http.statusText));
+                else
+                    throw new Error('request failed with status: '+ http.status + ', reason: ' + http.statusText);
             }
-            cb(res);
-        } else if (floor(http.status / 4) === 1) {
-            throw new Error('Request failed with ' + http.status);
         }
     };
 
     http.onerror = function () {
-        throw new Error('request failed with ' + http.status);
+        if (cberr)
+            cberr(new Error('request failed with status: '+ http.status + ', reason: ' + http.statusText));
+        else
+            throw new Error('request failed with status: '+ http.status + ', reason: ' + http.statusText);
     };
 
     if (headers)
@@ -253,7 +246,7 @@ function request (url, body, method, headers, cb) {
 
         // enforce json format
         if (typeof body === 'object')
-            body = serialize(body);
+            body = JSON.stringify(body);
     }
 
     // submit
@@ -266,44 +259,85 @@ function request (url, body, method, headers, cb) {
  * @param  {String}   url      Request route, conditionally with parameters 
  * @param  {Object}   headers  Map of request headers (optional)
  * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function submitGet (url, headers, cb) {
-    request(url, 'GET', headers, cb);
+function submitGet (url, headers, cb, cberr) {
+    if (typeof arguments[1] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, null, 'GET', headers, cb, cberr);
 };
 
 /**
  * Submits PUT request.
  * 
  * @param  {String}   url      Request route, conditionally with parameters 
- * @param  {Object}   body     Request body (optional)
- * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Object}   body     Request body 
+ * @param  {Object}   headers  Map of request headers
  * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function submitPut (url, body, headers, cb) {
-    request(url, body, 'PUT', headers, cb);
+function submitPut (url, body, headers, cb, cberr) {
+    if (typeof arguments[2] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, body, 'PUT', headers, cb, cberr);
+};
+
+/**
+ * Submits PATCH request.
+ * 
+ * @param  {String}   url      Request route
+ * @param  {Object}   headers  Map of request headers
+ * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
+ */
+function submitPatch (url, headers, cb, cberr) {
+    if (typeof arguments[1] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, null, 'PATCH', headers, cb);
 };
 
 /**
  * Submits POST request.
  * 
  * @param  {String}   url      Request route, conditionally with parameters 
- * @param  {Object}   body     Request body (optional)
- * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Object}   body     Request body
+ * @param  {Object}   headers  Map of request headers
  * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function submitPost (url, body, headers, cb) {
-    request(url, body, 'POST', headers, cb);
+function submitPost (url, body, headers, cb, cberr) {
+    if (typeof arguments[2] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, body, 'POST', headers, cb, cberr);
 };
 
 /**
  * Submits DELETE request.
  * 
  * @param  {String}   url      Request route
- * @param  {Object}   headers  Map of request headers (optional)
+ * @param  {Object}   headers  Map of request headers
  * @param  {Function} cb       Passed response text, in JSON format if applicable
+ * @param  {Function} cberr    Error callback (optional)
  */
-function submitDelete (url, headers, cb) {
-    request(url, 'GET', headers, cb);
+function submitDelete (url, headers, cb, cberr) {
+    if (typeof arguments[1] === 'function') {
+        cberr   = cb;
+        cb      = headers;
+        headers = null;
+    }
+    request(url, null, 'DELETE', headers, cb);
 };
 
 // ============================================================================
@@ -538,7 +572,7 @@ function appendHTML(path, parent, cb) {
         if (req.readyState === 4 && req.status === 200)
             parent.insertAdjacentHTML('beforeend', req.responseText);
         else
-            throw new Error('http failed with status: '+ req.status + ', reason: ' + req.statusText);
+            throw new Error('request failed with status: '+ req.status + ', reason: ' + req.statusText);
         cb();
     };
     req.send();
@@ -574,7 +608,9 @@ function appendJS(path, parent, cb) {
 };
 
 // ============================================================================
-// Class definition
+// Prototypal class definition
+// ============================================================================
+// - define
 // ============================================================================
 
 /**
@@ -593,7 +629,7 @@ function define (constr, contracts) {
     var meta = new Array(contracts.length);
     for (var i = 0, len = contracts.length; i < len; i++) {
         bind(constr.prototype, contracts[i]);
-        meta[i] = keysOf( contracts[i] );
+        meta[i] = Object.keys( contracts[i] );
     }
 
     var init = function () {
@@ -670,7 +706,7 @@ function bind (proto, attr) {
         }
     }
 
-    defineProperties(proto, properties);
+    Object.defineProperties(proto, properties);
 
     var key, fun, sup;
     for (var i = 0, len = methods.length; i < len; i++) {
@@ -684,7 +720,10 @@ function bind (proto, attr) {
 };
 
 // ============================================================================
-// Iteration
+// Async iteration
+// ============================================================================
+// - each
+// - eachGroup
 // ============================================================================
 
 /**
@@ -747,8 +786,10 @@ return {
     open : open,
     close: close,
 
+    request     : request,
     submitGet   : submitGet,
     submitPut   : submitPut,
+    submitPatch : submitPatch,
     submitPost  : submitPost,
     submitDelete: submitDelete,
 
@@ -756,7 +797,10 @@ return {
     invoke : invoke,
     append : append,
 
-    define: define
+    define: define,
+
+    each: each,
+    eachGroup: eachGroup
 };
 
 })();
