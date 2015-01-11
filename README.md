@@ -250,6 +250,7 @@ com.define(constr, contracts);
  * @param  {Function} cb    Passed array of res for each item applied to task
  */
 function each (items, task, cb);
+
 /**
  * Applies async task to items for each group & propagates to cb when done.
  * (See each)
@@ -273,3 +274,4 @@ Feel free to use non-commercially, but drop me a line for anything but for the s
 * 0.0.4 -- Fixed append* scenario with with no parent parameter
 * 0.0.5 -- Fixed path inconsistency bug on request registeration
 * 0.0.6 -- Exposed async iteration util & updated example's routes
+* 0.0.7 -- Reorg & better componetization.
