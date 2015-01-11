@@ -3,9 +3,9 @@ comjs
 
 > A vweb take of the Component Object Model architecture, spanning both native & browser environments, and inspired by the original [COM](http://en.wikipedia.org/wiki/Component_Object_Model).
 
-Most infrastructure running on Windows today is based on COM, a C++ interface standard that allows for componetization, reuse, and host-agnostic rpc. The web differs from these fronts only in that instead of componentization (& the implied rigid hierarchies of OOP), the focus is on functional modularization (& the implied flexibility of a functional perspective without the domain-constraints imposed by strict OOP). Simply put, the most imporant difference is that instead of requiring dll presence on the disk, the model requires a valid url endpoint to a module that's loaded asynchronously & is JIT-compiled on the client.
+Lots of infrastructure running on Windows today is based on COM, a C++ interface standard that allows for componetization, reuse, and host-agnostic rpc. The web differs from these fronts in that instead of componentization (& the implied rigid hierarchies of OOP), the focus is on functional modularization (& the implied flexibility of a functional perspective without the domain-constraints imposed by strict OOP).
 
-The goal is to consolidate fragmented workflows in client/server systems for the web in a single language and a consistent API surface engineered around laconic & frinctionless development: use the minimum necessary steps & aim for the maximum performance.
+The goal is to consolidate fragmented workflows in client/server systems for the web around a consistent surface, engineered around laconic & frinctionless development: use the minimum necessary steps & aim for the maximum performance.
 
 The functionality currently scopes five recurring tasks:
 
@@ -33,11 +33,13 @@ Best way is to go thru the example.
 
 ncom is the native implementation of the middleware & bcom is for the browser.
 
+(Note: This section hasn't been update yet to reflect changes in v0.7)
+
 ### Http & Websocket server (ncom only)
 
 ```javascript
 // ============================================================================
-// Http & WebSocket server
+// comjs/lib/ncom/rpc.server.js
 // ============================================================================
 // - start
 // - stop
@@ -52,7 +54,7 @@ ncom is the native implementation of the middleware & bcom is for the browser.
  * @param  {Object}   config Map of { port, requests, services, files }
  * @param  {Function} cb
  */
-com.start(config, cb);
+function start (port, req, rpc, cb) {
 
 /**
  * Stops server.
@@ -247,31 +249,7 @@ com.define(constr, contracts);
  * @param  {Array}    items (Can be non-array/single item)
  * @param  {Function} cb    Passed array of res for each item applied to task
  */
-function each (items, task, cb) { // adapted from https://github.com/caolan/async
-
-    if ( !(items instanceof Array) )
-        items = [items];
-
-    var idx = 0,
-        len = items.length,
-        res = [];
-
-    if (!len)
-        return cb([]);
-
-    var iter = function () {
-        task(items[idx++], function (out) {
-            res[res.length] = out;
-            if (idx >= len)
-                cb(res);
-            else
-                iter();
-        });
-    };
-    
-    iter();
-};
-
+function each (items, task, cb);
 /**
  * Applies async task to items for each group & propagates to cb when done.
  * (See each)
@@ -279,15 +257,7 @@ function each (items, task, cb) { // adapted from https://github.com/caolan/asyn
  * @param  {Array}    groups List of [ [items, task], ... ]
  * @param  {Function} cb     Passed array of results for each group
  */
-function eachGroup (groups, cb) {
-
-    if ( !(groups instanceof Array) )
-        groups = [].concat(groups);
-    
-    each(groups, function (group, done) {
-        each(group[0], group[1], done);
-    }, cb);
-};
+function eachGroup (groups, cb);
 ```
 
 ## Bugs

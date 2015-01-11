@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang='en'>
+<head>
+
+<meta http-equiv='Content-Type' content='text/html;charset=utf-8'/>
+<script type='text/javascript' src='bcom.js'></script>
+
+</head>
+<body>
+<!-- <h1>hybrid-stencil</h1> -->
+<script type='text/javascript'>
+
+    invoke('printer', function (printer) {
+
+        printer.print(1); // 6
+
+        invoke('logger', function (logger) {
+
+            logger.log(2); // 8
+
+
+            invoke('logger', function (logger) {
+                logger.log(1); // 9
+            });
+        });
+    });
+
+        var view;
+
+    bcom.amd.loader.append([
+        'append.html',
+        'append.css'
+    ], function () {
+        console.log('appended');
+    });
+
+    bcom.net.request.get('/foo', function (res) {
+        console.log(res); // bar
+    });
+
+    bcom.net.channel.open(function () {
+
+        proxy.math.add(2, 3, function (res) {
+            console.log(res); // 5
+        });
+    });
+
+</script>
+</body>
+</html>

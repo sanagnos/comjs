@@ -1,29 +1,33 @@
 {
-  "name": "comjs",
-  "version": "0.0.6",
-  "author": "Stelios Anagnostopoulos <stelios@outlook.com>",
-  "description": "A vweb take of the Component Object Model architecture, spanning both native & browser environments.",
-  "license": "All rights reserved.",
-  "main": "ncom.js",
-  "engines": {
-    "node": "0.10.33"
-  },
-  "dependencies": {
-    "ws": "*"
-  },
-  "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-uglify": "*"
-  },
-  "directories": {
-    "example": "examples"
-  },
-  "homepage": "https://github.com/sanagnos/comjs",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sanagnos/comjs"
-  },
-  "bugs": {
-    "url": "https://github.com/sanagnos/comjs/issues"
-  }
+    "name": "comjs",
+    "version": "0.0.7",
+    "author": "Stelios Anagnostopoulos <stelios@outlook.com>",
+    "description": "A vweb take of the Component Object Model architecture, spanning both native & browser environments.",
+    "license": "All rights reserved.",
+    "main": "ncom.js",
+
+    "engines": {
+        "node": "0.10.35"
+    },
+    
+    "dependencies": {
+        "ws": "*"
+    },
+    
+    "devDependencies": {
+        "grunt": "*",
+        "grunt-contrib-concat": "*",
+        "grunt-contrib-uglify": "*"
+    },
+    
+    "homepage": "https://github.com/sanagnos/comjs",
+    
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/sanagnos/comjs"
+    },
+    
+    "bugs": {
+        "url": "https://github.com/sanagnos/comjs/issues"
+    }
 }
